@@ -1,59 +1,48 @@
 ﻿// NUnit 3 tests
 // See documentation : https://github.com/nunit/docs/wiki/NUnit-Documentation
 
-using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace MovieRental
 {
     public class Customer
     {
-        private readonly Dictionary<Movie.Type, PriceStrategy> _priceStrategies =
-            new Dictionary<Movie.Type, PriceStrategy>();
-
-        private readonly List<IRenterPointsStrategy> _renterPointsStrategies =
-            new List<IRenterPointsStrategy>();
-
         public Customer(string name)
         {
             Name = name;
-            _priceStrategies.Add(Movie.Type.CHILDREN, new ChildrenMoviePriceStrategy());
-            _priceStrategies.Add(Movie.Type.NEW_RELEASE, new NewReleaseMoviePriceStrategy());
-            _priceStrategies.Add(Movie.Type.REGULAR, new RegularMoviePriceStrategy());
-
-            _renterPointsStrategies.Add(new ActiveRenterPointsStrategy());
-            _renterPointsStrategies.Add(new NewReleasesPer2DaysPointsStrategy());
         }
 
         public string Name { get; }
 
-        public Rents Rents { get; } = new Rents();
-
-        internal string statement()
+        public override bool Equals(object other)
         {
-            var report = new StringBuilder();
-            report.Append($"учет аренды для {Name}\n");
-            double totalAmount = 0;
+            if (ReferenceEquals(this, other))
+                return true;
 
-            var frequentRenterPoints = 0;
-            foreach (var item in Rents)
-            {
-                double thisAmount = 0;
+            if (other is null)
+                return false;
 
-                thisAmount += _priceStrategies[item.Movie.PriceCode].GetPriceForDays(item.DaysRented);
+            if (!(other is Customer c))
+                return false;
 
-                foreach (var renterPointsStrategy in _renterPointsStrategies)
-                    frequentRenterPoints += renterPointsStrategy.GetRenterPoints(item.Movie.PriceCode, item.DaysRented);
+            return Name == c.Name;
+        }
 
-                report.Append($"\t{item.Movie}\t{thisAmount}\n");
+        public override int GetHashCode()
+        {
+            return Name?.GetHashCode() ?? 0;
+        }
 
-                totalAmount += thisAmount;
-            }
+        public static bool operator !=(Customer obj1, Customer obj2)
+        {
+            return !(obj1 == obj2);
+        }
 
-            report.Append(
-                $"Сумма задолженности составляет {totalAmount}\nВы заработали {frequentRenterPoints} очков за активность");
-            return report.ToString();
+        public static bool operator ==(Customer obj1, Customer obj2)
+        {
+            return obj1?.Equals(obj2) ?? false;
         }
     }
 
@@ -139,28 +128,83 @@ namespace MovieRental
         }
     }
 
-    public class Rents : IEnumerable<Rental>
+    public class Rents
     {
-        private readonly List<Rental> _rents = new List<Rental>();
+        private readonly List<CustomerRent> _rents = new List<CustomerRent>();
 
-        public IEnumerator<Rental> GetEnumerator()
+        public void Add(Customer customer, Rental rental)
         {
-            return _rents.GetEnumerator();
+            _rents.Add(new CustomerRent(customer, rental));
         }
 
-        IEnumerator IEnumerable.GetEnumerator()
+        public void Add(Customer customer, Movie movie, int days)
         {
-            return GetEnumerator();
+            Add(customer, new Rental(movie, days));
         }
 
-        public void Add(Rental rental)
+        public IEnumerable<Rental> GetRentsForCustomer(Customer customer)
         {
-            _rents.Add(rental);
+            return _rents
+                .Where(x => x.Customer == customer)
+                .Select(x => x.Rental)
+                .ToArray();
         }
 
-        public void Add(Movie movie, int days)
+        private class CustomerRent
         {
-            _rents.Add(new Rental(movie, days));
+            public CustomerRent(Customer customer, Rental rental)
+            {
+                Rental = rental;
+                Customer = customer;
+            }
+
+            public Rental Rental { get; }
+            public Customer Customer { get; }
+        }
+    }
+
+    public class Statements
+    {
+        private readonly Dictionary<Movie.Type, PriceStrategy> _priceStrategies =
+            new Dictionary<Movie.Type, PriceStrategy>();
+
+        private readonly List<IRenterPointsStrategy> _renterPointsStrategies =
+            new List<IRenterPointsStrategy>();
+
+        public Statements()
+        {
+            _priceStrategies.Add(Movie.Type.CHILDREN, new ChildrenMoviePriceStrategy());
+            _priceStrategies.Add(Movie.Type.NEW_RELEASE, new NewReleaseMoviePriceStrategy());
+            _priceStrategies.Add(Movie.Type.REGULAR, new RegularMoviePriceStrategy());
+
+            _renterPointsStrategies.Add(new ActiveRenterPointsStrategy());
+            _renterPointsStrategies.Add(new NewReleasesPer2DaysPointsStrategy());
+        }
+
+        public string GetStatement(Rents rents, Customer customer)
+        {
+            var report = new StringBuilder();
+            report.Append($"учет аренды для {customer.Name}\n");
+            double totalAmount = 0;
+
+            var frequentRenterPoints = 0;
+            foreach (var item in rents.GetRentsForCustomer(customer))
+            {
+                double thisAmount = 0;
+
+                thisAmount += _priceStrategies[item.Movie.PriceCode].GetPriceForDays(item.DaysRented);
+
+                foreach (var renterPointsStrategy in _renterPointsStrategies)
+                    frequentRenterPoints += renterPointsStrategy.GetRenterPoints(item.Movie.PriceCode, item.DaysRented);
+
+                report.Append($"\t{item.Movie}\t{thisAmount}\n");
+
+                totalAmount += thisAmount;
+            }
+
+            report.Append(
+                $"Сумма задолженности составляет {totalAmount}\nВы заработали {frequentRenterPoints} очков за активность");
+            return report.ToString();
         }
     }
 }
