@@ -52,15 +52,15 @@ namespace MovieRental
 
             var movie1 = new Movie("Angry Birds", Movie.Type.CHILDREN);
             var rental1 = new Rental(movie1, 2);
-            customer.addRental(rental1);
+            customer.Rents.Add(rental1);
 
             var movie2 = new Movie("StarWar", Movie.Type.NEW_RELEASE);
             var rental2 = new Rental(movie2, 10);
-            customer.addRental(rental2);
+            customer.Rents.Add(rental2);
 
             var movie3 = new Movie("Hatico", Movie.Type.REGULAR);
             var rental3 = new Rental(movie3, 4);
-            customer.addRental(rental3);
+            customer.Rents.Add(rental3);
 
             var actual = customer.statement();
             Assert.AreEqual(

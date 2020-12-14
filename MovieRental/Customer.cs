@@ -1,6 +1,7 @@
 ﻿// NUnit 3 tests
 // See documentation : https://github.com/nunit/docs/wiki/NUnit-Documentation
 
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
@@ -13,9 +14,6 @@ namespace MovieRental
 
         private readonly List<IRenterPointsStrategy> _renterPointsStrategies =
             new List<IRenterPointsStrategy>();
-
-        private readonly List<Rental> rentals =
-            new List<Rental>();
 
         public Customer(string name)
         {
@@ -30,10 +28,7 @@ namespace MovieRental
 
         public string Name { get; }
 
-        internal void addRental(Rental rental)
-        {
-            rentals.Add(rental);
-        }
+        public Rents Rents { get; } = new Rents();
 
         internal string statement()
         {
@@ -42,7 +37,7 @@ namespace MovieRental
             double totalAmount = 0;
 
             var frequentRenterPoints = 0;
-            foreach (var item in rentals)
+            foreach (var item in Rents)
             {
                 double thisAmount = 0;
 
@@ -141,6 +136,31 @@ namespace MovieRental
                 return 1;
 
             return 0;
+        }
+    }
+
+    public class Rents : IEnumerable<Rental>
+    {
+        private readonly List<Rental> _rents = new List<Rental>();
+
+        public IEnumerator<Rental> GetEnumerator()
+        {
+            return _rents.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        public void Add(Rental rental)
+        {
+            _rents.Add(rental);
+        }
+
+        public void Add(Movie movie, int days)
+        {
+            _rents.Add(new Rental(movie, days));
         }
     }
 }
