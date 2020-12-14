@@ -12,28 +12,19 @@ namespace MovieRental
             CHILDREN
         }
 
-        private readonly string title;
-        private readonly Type type;
-
         public Movie(string title, Type type)
         {
-            this.title = title;
-            this.type = type;
+            Title = title;
+            PriceCode = type;
         }
 
-        public string getTitle()
-        {
-            return title;
-        }
+        public string Title { get; }
 
-        public Type getPriceCode()
-        {
-            return type;
-        }
+        public Type PriceCode { get; }
 
         public override string ToString()
         {
-            return title;
+            return Title;
         }
     }
 }

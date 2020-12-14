@@ -12,14 +12,14 @@ namespace MovieRental
         public void NameFilmShouldBeCorrect()
         {
             var movie = new Movie("Rio2", Movie.Type.NEW_RELEASE);
-            Assert.AreEqual("Rio2", movie.getTitle());
+            Assert.AreEqual("Rio2", movie.Title);
         }
 
         [Test]
         public void TypeFilmShouldBeCorrect()
         {
             var movie = new Movie("Rio2", Movie.Type.NEW_RELEASE);
-            Assert.AreEqual(Movie.Type.NEW_RELEASE, movie.getPriceCode());
+            Assert.AreEqual(Movie.Type.NEW_RELEASE, movie.PriceCode);
         }
 
         [Test]
@@ -27,7 +27,7 @@ namespace MovieRental
         {
             var movie = new Movie("Angry Birds", Movie.Type.REGULAR);
             var rental = new Rental(movie, 20);
-            Assert.AreEqual(movie, rental.getMovie());
+            Assert.AreEqual(movie, rental.Movie);
         }
 
         [Test]
@@ -35,14 +35,14 @@ namespace MovieRental
         {
             var movie = new Movie("Angry Birds", Movie.Type.REGULAR);
             var rental = new Rental(movie, 20);
-            Assert.AreEqual(20, rental.getDaysRented());
+            Assert.AreEqual(20, rental.DaysRented);
         }
 
         [Test]
         public void CustomerShouldBeCorrectName()
         {
             var customer = new Customer("Bug");
-            Assert.AreEqual("Bug", customer.getName());
+            Assert.AreEqual("Bug", customer.Name);
         }
 
         [Test]
