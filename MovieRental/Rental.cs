@@ -1,13 +1,12 @@
 ﻿// NUnit 3 tests
 // See documentation : https://github.com/nunit/docs/wiki/NUnit-Documentation
-using System;
 
 namespace MovieRental
 {
     internal class Rental
     {
-        private Movie movie;
-        private int daysRental;
+        private readonly int daysRental;
+        private readonly Movie movie;
 
         public Rental(Movie movie, int daysRental)
         {
@@ -17,7 +16,7 @@ namespace MovieRental
 
         internal Movie getMovie()
         {
-           return movie;
+            return movie;
         }
 
         internal int getDaysRented()
