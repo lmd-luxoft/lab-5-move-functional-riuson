@@ -10,9 +10,15 @@ namespace MovieRental
     {
         private readonly List<Rental> rentals = new List<Rental>();
 
+        private readonly Dictionary<Movie.Type, PriceStrategy> _priceStrategies =
+            new Dictionary<Movie.Type, PriceStrategy>();
+
         public Customer(string name)
         {
             Name = name;
+            _priceStrategies.Add(Movie.Type.CHILDREN, new ChildrenMoviePriceStrategy());
+            _priceStrategies.Add(Movie.Type.NEW_RELEASE, new NewReleaseMoviePriceStrategy());
+            _priceStrategies.Add(Movie.Type.REGULAR, new RegularMoviePriceStrategy());
         }
 
         public string Name { get; }
@@ -32,22 +38,8 @@ namespace MovieRental
             foreach (var item in rentals)
             {
                 double thisAmount = 0;
-                switch (item.Movie.PriceCode)
-                {
-                    case Movie.Type.REGULAR:
-                        thisAmount += 2;
-                        if (item.DaysRented > 2)
-                            thisAmount += (item.DaysRented - 2) * 15;
-                        break;
-                    case Movie.Type.NEW_RELEASE:
-                        thisAmount += item.DaysRented * 3;
-                        break;
-                    case Movie.Type.CHILDREN:
-                        thisAmount += 15;
-                        if (item.DaysRented > 3)
-                            thisAmount += (item.DaysRented - 3) * 15;
-                        break;
-                }
+
+                thisAmount += _priceStrategies[item.Movie.PriceCode].GetPriceForDays(item.DaysRented);
 
                 //добавить очки для активного арендатора
                 frequentRenterPoints++;
@@ -62,6 +54,64 @@ namespace MovieRental
             report.Append(
                 $"Сумма задолженности составляет {totalAmount}\nВы заработали {frequentRenterPoints} очков за активность");
             return report.ToString();
+        }
+    }
+
+    public abstract class PriceStrategy
+    {
+        public PriceStrategy(Movie.Type movieType)
+        {
+            MovieType = movieType;
+        }
+
+        public Movie.Type MovieType { get; }
+
+        public abstract double GetPriceForDays(int daysRented);
+    }
+
+    public class RegularMoviePriceStrategy : PriceStrategy
+    {
+        public RegularMoviePriceStrategy() : base(Movie.Type.REGULAR)
+        {
+        }
+
+        public override double GetPriceForDays(int daysRented)
+        {
+            double result = 2;
+
+            if (daysRented > 2)
+                result += (daysRented - 2) * 15;
+
+            return result;
+        }
+    }
+
+    public class NewReleaseMoviePriceStrategy : PriceStrategy
+    {
+        public NewReleaseMoviePriceStrategy() : base(Movie.Type.NEW_RELEASE)
+        {
+        }
+
+        public override double GetPriceForDays(int daysRented)
+        {
+            return daysRented * 3;
+        }
+    }
+
+    public class ChildrenMoviePriceStrategy : PriceStrategy
+    {
+        public ChildrenMoviePriceStrategy() : base(Movie.Type.CHILDREN)
+        {
+        }
+
+        public override double GetPriceForDays(int daysRented)
+        {
+            double result = 15;
+
+            if (daysRented > 3)
+                result += (daysRented - 3) * 15;
+
+            return result;
         }
     }
 }
