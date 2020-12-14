@@ -8,10 +8,14 @@ namespace MovieRental
 {
     public class Customer
     {
-        private readonly List<Rental> rentals = new List<Rental>();
-
         private readonly Dictionary<Movie.Type, PriceStrategy> _priceStrategies =
             new Dictionary<Movie.Type, PriceStrategy>();
+
+        private readonly List<IRenterPointsStrategy> _renterPointsStrategies =
+            new List<IRenterPointsStrategy>();
+
+        private readonly List<Rental> rentals =
+            new List<Rental>();
 
         public Customer(string name)
         {
@@ -19,6 +23,9 @@ namespace MovieRental
             _priceStrategies.Add(Movie.Type.CHILDREN, new ChildrenMoviePriceStrategy());
             _priceStrategies.Add(Movie.Type.NEW_RELEASE, new NewReleaseMoviePriceStrategy());
             _priceStrategies.Add(Movie.Type.REGULAR, new RegularMoviePriceStrategy());
+
+            _renterPointsStrategies.Add(new ActiveRenterPointsStrategy());
+            _renterPointsStrategies.Add(new NewReleasesPer2DaysPointsStrategy());
         }
 
         public string Name { get; }
@@ -41,11 +48,9 @@ namespace MovieRental
 
                 thisAmount += _priceStrategies[item.Movie.PriceCode].GetPriceForDays(item.DaysRented);
 
-                //добавить очки для активного арендатора
-                frequentRenterPoints++;
-                //бонус за аренду новинки на два дня
-                if (item.Movie.PriceCode == Movie.Type.NEW_RELEASE && item.DaysRented > 1)
-                    frequentRenterPoints++;
+                foreach (var renterPointsStrategy in _renterPointsStrategies)
+                    frequentRenterPoints += renterPointsStrategy.GetRenterPoints(item.Movie.PriceCode, item.DaysRented);
+
                 report.Append($"\t{item.Movie}\t{thisAmount}\n");
 
                 totalAmount += thisAmount;
@@ -112,6 +117,30 @@ namespace MovieRental
                 result += (daysRented - 3) * 15;
 
             return result;
+        }
+    }
+
+    public interface IRenterPointsStrategy
+    {
+        int GetRenterPoints(Movie.Type movieType, int daysRented);
+    }
+
+    public class ActiveRenterPointsStrategy : IRenterPointsStrategy
+    {
+        public int GetRenterPoints(Movie.Type _, int __)
+        {
+            return 1;
+        }
+    }
+
+    public class NewReleasesPer2DaysPointsStrategy : IRenterPointsStrategy
+    {
+        public int GetRenterPoints(Movie.Type movieType, int daysRented)
+        {
+            if (movieType == Movie.Type.NEW_RELEASE && daysRented > 1)
+                return 1;
+
+            return 0;
         }
     }
 }
