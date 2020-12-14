@@ -73,7 +73,7 @@ namespace MovieRental
             var movie6 = new Movie("Hatico", Movie.Type.REGULAR);
             rents.Add(customer2, movie6, 7);
 
-            var statements = new Statements();
+            var statements = StatementsFactory.Create();
 
             // Act.
             var rents1 = rents.GetRentsForCustomer(customer1);
@@ -112,7 +112,7 @@ namespace MovieRental
             var movie3 = new Movie("Hatico", Movie.Type.REGULAR);
             rents.Add(customer, movie3, 4);
 
-            var statements = new Statements();
+            var statements = StatementsFactory.Create();
 
             var actual = statements.GetStatement(rents, customer);
             Assert.AreEqual(

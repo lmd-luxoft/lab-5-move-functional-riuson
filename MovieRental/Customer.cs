@@ -165,20 +165,15 @@ namespace MovieRental
 
     public class Statements
     {
-        private readonly Dictionary<Movie.Type, PriceStrategy> _priceStrategies =
-            new Dictionary<Movie.Type, PriceStrategy>();
+        private readonly IDictionary<Movie.Type, PriceStrategy> _priceStrategies;
+        private readonly IEnumerable<IRenterPointsStrategy> _renterPointsStrategies;
 
-        private readonly List<IRenterPointsStrategy> _renterPointsStrategies =
-            new List<IRenterPointsStrategy>();
-
-        public Statements()
+        public Statements(
+            IEnumerable<PriceStrategy> priceStrategies,
+            IEnumerable<IRenterPointsStrategy> renterPointsStrategies)
         {
-            _priceStrategies.Add(Movie.Type.CHILDREN, new ChildrenMoviePriceStrategy());
-            _priceStrategies.Add(Movie.Type.NEW_RELEASE, new NewReleaseMoviePriceStrategy());
-            _priceStrategies.Add(Movie.Type.REGULAR, new RegularMoviePriceStrategy());
-
-            _renterPointsStrategies.Add(new ActiveRenterPointsStrategy());
-            _renterPointsStrategies.Add(new NewReleasesPer2DaysPointsStrategy());
+            _priceStrategies = priceStrategies.ToDictionary(x => x.MovieType);
+            _renterPointsStrategies = renterPointsStrategies;
         }
 
         public string GetStatement(Rents rents, Customer customer)
@@ -205,6 +200,26 @@ namespace MovieRental
             report.Append(
                 $"Сумма задолженности составляет {totalAmount}\nВы заработали {frequentRenterPoints} очков за активность");
             return report.ToString();
+        }
+    }
+
+    public static class StatementsFactory
+    {
+        public static Statements Create()
+        {
+            return new Statements(
+                new PriceStrategy[]
+                {
+                    new ChildrenMoviePriceStrategy(),
+                    new NewReleaseMoviePriceStrategy(),
+                    new RegularMoviePriceStrategy()
+                },
+                new IRenterPointsStrategy[]
+                {
+                    new ActiveRenterPointsStrategy(),
+                    new NewReleasesPer2DaysPointsStrategy()
+                }
+            );
         }
     }
 }
