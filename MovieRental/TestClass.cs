@@ -46,6 +46,18 @@ namespace MovieRental
             Assert.AreEqual("Bug", customer.Name);
         }
 
+        [TestCase("name", "name", ExpectedResult = true)]
+        [TestCase("name1", "name2", ExpectedResult = false)]
+        public bool CustomersShoudSuuportEquality(string name1, string name2)
+        {
+            // Arrange.
+            var customer1 = new Customer(name1);
+            var customer2 = new Customer(name2);
+
+            // Act & Assert.
+            return customer1 == customer2;
+        }
+
         [Test]
         public void RentsShouldDistinctPerCustomers()
         {
@@ -64,37 +76,35 @@ namespace MovieRental
             var movie3 = new Movie("Hatico", Movie.Type.REGULAR);
             rents.Add(customer1, movie3, 4);
 
-            var movie4 = new Movie("Angry Birds", Movie.Type.CHILDREN);
+            var movie4 = new Movie("Cauldron", Movie.Type.CHILDREN);
             rents.Add(customer2, movie4, 5);
 
-            var movie5 = new Movie("StarWar", Movie.Type.NEW_RELEASE);
+            var movie5 = new Movie("Accelerando", Movie.Type.NEW_RELEASE);
             rents.Add(customer2, movie5, 6);
 
-            var movie6 = new Movie("Hatico", Movie.Type.REGULAR);
+            var movie6 = new Movie("The Three-Body Problem", Movie.Type.REGULAR);
             rents.Add(customer2, movie6, 7);
 
-            var statements = StatementsFactory.Create();
-
             // Act.
-            var rents1 = rents.GetRentsForCustomer(customer1);
-            var rents2 = rents.GetRentsForCustomer(customer2);
+            var rents1 = rents.GetRentsForCustomer(customer1).ToArray();
+            var rents2 = rents.GetRentsForCustomer(customer2).ToArray();
 
             // Assert.
-            Assert.That(rents1.Count(), Is.EqualTo(3));
-            Assert.That(rents1.ElementAt(0).Movie, Is.EqualTo(movie1));
-            Assert.That(rents1.ElementAt(1).Movie, Is.EqualTo(movie2));
-            Assert.That(rents1.ElementAt(2).Movie, Is.EqualTo(movie3));
-            Assert.That(rents1.ElementAt(0).DaysRented, Is.EqualTo(2));
-            Assert.That(rents1.ElementAt(1).DaysRented, Is.EqualTo(3));
-            Assert.That(rents1.ElementAt(2).DaysRented, Is.EqualTo(4));
+            Assert.That(rents1.Length, Is.EqualTo(3));
+            Assert.That(rents1[0].Movie, Is.EqualTo(movie1));
+            Assert.That(rents1[1].Movie, Is.EqualTo(movie2));
+            Assert.That(rents1[2].Movie, Is.EqualTo(movie3));
+            Assert.That(rents1[0].DaysRented, Is.EqualTo(2));
+            Assert.That(rents1[1].DaysRented, Is.EqualTo(3));
+            Assert.That(rents1[2].DaysRented, Is.EqualTo(4));
 
-            Assert.That(rents2.Count(), Is.EqualTo(3));
-            Assert.That(rents2.ElementAt(0).Movie, Is.EqualTo(movie4));
-            Assert.That(rents2.ElementAt(1).Movie, Is.EqualTo(movie5));
-            Assert.That(rents2.ElementAt(2).Movie, Is.EqualTo(movie6));
-            Assert.That(rents2.ElementAt(0).DaysRented, Is.EqualTo(5));
-            Assert.That(rents2.ElementAt(1).DaysRented, Is.EqualTo(6));
-            Assert.That(rents2.ElementAt(2).DaysRented, Is.EqualTo(7));
+            Assert.That(rents2.Length, Is.EqualTo(3));
+            Assert.That(rents2[0].Movie, Is.EqualTo(movie4));
+            Assert.That(rents2[1].Movie, Is.EqualTo(movie5));
+            Assert.That(rents2[2].Movie, Is.EqualTo(movie6));
+            Assert.That(rents2[0].DaysRented, Is.EqualTo(5));
+            Assert.That(rents2[1].DaysRented, Is.EqualTo(6));
+            Assert.That(rents2[2].DaysRented, Is.EqualTo(7));
         }
 
         [Test]
