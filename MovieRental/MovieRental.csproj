@@ -40,9 +40,19 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ActiveRenterPointsStrategy.cs" />
+    <Compile Include="ChildrenMoviePriceStrategy.cs" />
     <Compile Include="Customer.cs" />
+    <Compile Include="IRenterPointsStrategy.cs" />
     <Compile Include="Movie.cs" />
+    <Compile Include="NewReleaseMoviePriceStrategy.cs" />
+    <Compile Include="NewReleasesPer2DaysPointsStrategy.cs" />
+    <Compile Include="PriceStrategy.cs" />
+    <Compile Include="RegularMoviePriceStrategy.cs" />
     <Compile Include="Rental.cs" />
+    <Compile Include="Rents.cs" />
+    <Compile Include="Statements.cs" />
+    <Compile Include="StatementsFactory.cs" />
     <Compile Include="TestClass.cs" />
   </ItemGroup>
   <ItemGroup>

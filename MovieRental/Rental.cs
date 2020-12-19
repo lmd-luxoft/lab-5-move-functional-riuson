@@ -1,28 +1,18 @@
 ﻿// NUnit 3 tests
 // See documentation : https://github.com/nunit/docs/wiki/NUnit-Documentation
-using System;
 
 namespace MovieRental
 {
-    internal class Rental
+    public class Rental
     {
-        private Movie movie;
-        private int daysRental;
-
         public Rental(Movie movie, int daysRental)
         {
-            this.movie = movie;
-            this.daysRental = daysRental;
+            Movie = movie;
+            DaysRented = daysRental;
         }
 
-        internal Movie getMovie()
-        {
-           return movie;
-        }
+        public Movie Movie { get; }
 
-        internal int getDaysRented()
-        {
-            return daysRental;
-        }
+        public int DaysRented { get; }
     }
 }
